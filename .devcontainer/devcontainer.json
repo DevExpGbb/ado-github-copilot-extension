@@ -1,0 +1,19 @@
+// See https://containers.dev/implementors/json_reference/ for configuration reference
+{
+	"name": "Azure DevOps GitHub Copilot extension",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+"remoteUser": "node",
+"features": {
+	"ghcr.io/devcontainers/features/github-cli:1": {},
+	"ghcr.io/jckimble/devcontainer-features/ngrok:3": {}
+},
+"customizations": {
+	"vscode": {
+		"extensions": [
+			"humao.rest-client"
+		]
+	}
+}
+}
