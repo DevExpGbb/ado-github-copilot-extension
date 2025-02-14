@@ -1,4 +1,5 @@
-const azdev = require('azure-devops-node-api');
+const codeScanningService = require('../services/codeScanningService');
+
 
 const getAlerts = async (req, res) => {
 
@@ -12,27 +13,17 @@ const getAlerts = async (req, res) => {
         currentFilePath: req.body.currentFilePath,
     };
 
-    const orgUrl = `https://dev.azure.com/${process.env.ADO_ORG}`;
-    let authHandler = azdev.getPersonalAccessTokenHandler(process.env.ADO_PAT);
-    let connection = new azdev.WebApi(orgUrl, authHandler);
-    const projectApi = await connection.getCoreApi();
 
-    projectApi.getProject(params.project).then((project) => {
-        console.log(project);
-    });
-
-    const alertApi = await connection.getAlertApi();
-
-    const alerts = await alertApi.getAlerts(params.project, params.repository);
+    const alerts = await codeScanningService.getAlerts(params.project, params.repository, params.userName, params.currentFilePath);
 
     if (alerts) {
 
         // Count how many alerts are from CodeQL, how many are from Advanced Security Dependency Scanning
-        const codeQLAlerts = alerts.filter(alert => alert.tool.name === 'CodeQL');
-        const asdsAlerts = alerts.filter(alert => alert.tool.name === 'Advanced Security Dependency Scanning');
+        const codeQLAlerts = alerts.filter(alert => alert.tools.some(tool => tool.name === 'CodeQL'));
+        const dependencyAlerts = alerts.filter(alert => alert.tools.some(tool => tool.name === 'Advanced Security Dependency Scanning'));
 
         console.log(`CodeQL alerts: ${codeQLAlerts.length}`);
-        console.log(`Advanced Security Dependency Scanning alerts: ${asdsAlerts.length}`);
+        console.log(`Advanced Security Dependency Scanning alerts: ${dependencyAlerts.length}`);
     }
 
     res.json(alerts);
